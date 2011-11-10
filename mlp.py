@@ -92,7 +92,7 @@ class MLP(object):
         da = derivatives[self.act] # da for derivative of activation
         d = [[] for _ in range(len(w))] # d for deltas
         
-        calc_bottom_delta = lambda i: (a[-1][i] - t[i]) * da(v[-1][i])
+        calc_bottom_delta = lambda i: (t[i] - a[-1][i]) * da(v[-1][i])
         d[-1] = list(map(calc_bottom_delta, range(len(t))))
         
         for l in reversed(range(len(w))[:-1]):
