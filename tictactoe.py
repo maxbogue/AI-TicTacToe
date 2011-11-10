@@ -48,6 +48,38 @@ def minimax(board, p, a=None, b=None):
             a = max(a, v) if a else v
         return v
 
+def game(p1, p2):
+    p1.set_player(1)
+    p2.set_player(-1)
+    board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    p1_turn = True
+    while final_state(board, 1) == None:
+        if p1_turn:
+            board = p1.move(board)
+        else:
+            board = p1.move(board)
+        p1_turn = not p1_turn
+    result = final_state(board, 1)
+    p1.game_over(result)
+    p2.game_over(2 - result)
+    print_board(board)
+
+class Agent(object):
+    """An interface that defines what a game agent should be able to do."""
+    
+    def set_player(p):
+        """Sets the player of this agent to 1 or -1."""
+        self.p == p
+    
+    def move(self, board):
+        """Performs an action on the board and returns the new board."""
+        raise NotImplementedError
+    
+    def game_over(score):
+        """Function called when the game has ended."""
+        pass
+    
+
 # print(minimax([0 for _ in range(n*n)], 1))
 assert minimax([
     1, -1, 1,
