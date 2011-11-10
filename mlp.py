@@ -16,8 +16,8 @@ class MLP(object):
         # Generate weights using awesome list comprehensions.
         weights = [[[
             random() * 2 - 1
-                for k in range(layout[i+1])]
-                    for j in range(layout[i])]
+                for k in range(layout[i])]
+                    for j in range(layout[i+1])]
                         for i in range(len(layout) - 1)]
         return MLP(weights, **extras)
     
