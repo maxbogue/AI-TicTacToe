@@ -1,10 +1,17 @@
+# The size of a side of the game board.
 N = 3
 
+# Constants for player 1, player 2, and empty space.
 P1 = 1
 P2 = -1
 ES = 0
 
 def print_board(board):
+    """Prints a very simple board representation followed by a newline.
+    
+    X is used for player 1, O for player 2, and a - for an empty space.
+    
+    """
     d = {
         P1: 'X',
         P2: 'O',
@@ -15,6 +22,7 @@ def print_board(board):
     print()
 
 def next_states(board, p):
+    """Generates every possible next state for a board at player p's turn."""
     ls = []
     for i in range(N*N):
         if board[i] == 0:
@@ -24,6 +32,15 @@ def next_states(board, p):
     return ls
 
 def final_state(board, p):
+    """Computes whether a board is in a final state.
+    
+    Returns the score for player p if it is:
+    
+    0 for loss
+    1 for tie
+    2 for win
+    
+    """
     if not any(map(lambda x: x == ES, board)):
         return 1 # Tie
     lines = [[], []]
