@@ -1,10 +1,14 @@
 N = 3
 
+P1 = 1
+P2 = -1
+ES = 0
+
 def print_board(board):
     d = {
-        1: 'X',
-        -1: 'O',
-        0: '-'
+        P1: 'X',
+        P2: 'O',
+        ES: '-'
     }
     for i in range(0, N*N, N):
         print("".join(d[board[j]] for j in range(i, i+N)))
@@ -20,7 +24,7 @@ def next_states(board, p):
     return ls
 
 def final_state(board, p):
-    if not any(map(lambda x: x == 0, board)):
+    if not any(map(lambda x: x == ES, board)):
         return 1 # Tie
     lines = [[], []]
     for i in range(N):
@@ -49,8 +53,8 @@ def minimax(board, p, a=None, b=None):
         return v
 
 def game(p1, p2):
-    p1.set_player(1)
-    p2.set_player(-1)
+    p1.set_player(P1)
+    p2.set_player(P2)
     board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     p1_turn = True
     while final_state(board, 1) == None:
