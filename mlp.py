@@ -39,7 +39,7 @@ class MLP(object):
         
         """
         # Add a bias for each layer except the last.
-        layout = map(lambda n: n + 1, layout[:-1]) + [layout[-1]];
+        layout = list(map(lambda n: n + 1, layout[:-1])) + [layout[-1]];
         # Generate weights using awesome list comprehensions.
         weights = [[[
             random() * 2 - 1
