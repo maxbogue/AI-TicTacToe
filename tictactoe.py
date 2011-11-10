@@ -1,4 +1,4 @@
-n = 3
+N = 3
 
 def print_board(board):
     d = {
@@ -6,13 +6,13 @@ def print_board(board):
         -1: 'O',
         0: '-'
     }
-    for i in range(0, n*n, n):
-        print("".join(d[board[j]] for j in range(i, i+n)))
+    for i in range(0, N*N, N):
+        print("".join(d[board[j]] for j in range(i, i+N)))
     print()
 
 def next_states(board, p):
     ls = []
-    for i in range(n*n):
+    for i in range(N*N):
         if board[i] == 0:
             b = list(board)
             b[i] = p
@@ -23,11 +23,11 @@ def final_state(board, p):
     if not any(map(lambda x: x == 0, board)):
         return 1 # Tie
     lines = [[], []]
-    for i in range(n):
-        lines[0].append(i * (n + 1))
-        lines[1].append((i + 1) * (n - 1))
-        lines.append(list(filter(lambda x: x % n == i, range(n*n))))
-        lines.append(list(filter(lambda x: x // n == i, range(n*n))))
+    for i in range(N):
+        lines[0].append(i * (N + 1))
+        lines[1].append((i + 1) * (N - 1))
+        lines.append(list(filter(lambda x: x % N == i, range(N*N))))
+        lines.append(list(filter(lambda x: x // N == i, range(N*N))))
     for line in lines:
         if all(map(lambda i: board[i] == p, line)):
             return 2
