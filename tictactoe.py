@@ -172,4 +172,16 @@ def test():
 if __name__ == "__main__":
     # test()
     mlp = MLP.create(10, 10, 1)
-    print(game(MinimaxAgent(), MLPAgent(mlp)))
+    # lr = MLP.create(10, 1)
+    for i in range(10):
+        winner, board = game(MLPAgent(mlp), MLPAgent(mlp))
+        print(winner)
+        if winner == P1:
+            print("Game %s was won by player 1:" % i)
+        elif winner == P2:
+            print("Game %s was won by player 2:" % i)
+        else:
+            print("Game %s was a tie." % i)
+        print_board(board)
+    print("Final:")
+    print(mlp.weights)
