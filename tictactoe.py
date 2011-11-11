@@ -9,7 +9,7 @@ P2 = -1
 ES = 0
 
 def print_board(board):
-    """Prints a very simple board representation followed by a newline.
+    """Prints a very simple board representation.
     
     X is used for player 1, O for player 2, and a - for an empty space.
     
@@ -21,7 +21,6 @@ def print_board(board):
     }
     for i in range(0, N*N, N):
         print("".join(d[board[j]] for j in range(i, i+N)))
-    print()
 
 def next_states(board, p):
     """Generates every possible next state for a board at player p's turn."""
@@ -89,11 +88,11 @@ def game(p1, p2):
         else:
             board = p2.move(board)
         p1_turn = not p1_turn
-    result = final_state(board, 1)
+    result = final_state(board, P1)
     p1.game_over(result)
     p2.game_over(2 - result)
-    print_board(board)
-    return result
+    print(result)
+    return result - 1, board
 
 class Agent(object):
     """An interface that defines what a game agent should be able to do."""
