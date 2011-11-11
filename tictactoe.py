@@ -1,3 +1,5 @@
+import random
+
 from mlp import MLP
 
 # The size of a side of the game board.
@@ -119,6 +121,23 @@ class MLPAgent(Agent):
     def game_over(self, score):
         truths = [[score] for _ in range(len(self.examples[self.p]))]
         self.mlp.train(self.examples[self.p], truths)
+    
+
+class RandomAgent(Agent):
+    
+    def move(self, board):
+        return random.choice(next_states(board, self.p))
+    
+
+class SemiRandomAgent(Agent):
+    
+    def eval(self, board, p):
+        assert(p == self.p)
+        return random.random() * 2
+    
+    def move(self, board):
+        return minimax(board, self.p, self.eval, 3)[1]
+    
 
 def game(p1, p2):
     p1.set_player(P1)
