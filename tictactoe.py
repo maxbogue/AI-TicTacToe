@@ -159,8 +159,13 @@ def game(p1, p2):
 def main():
     mlp = MLP.create(10, 10, 1)
     lr = MLP.create(10, 1)
-    for i in range(1, 101):
-        winner, board = game(MLPAgent(mlp), SemiRandomAgent())
+    train(mlp)
+    train(lr)
+    for i in range(1, 10):
+        if i % 2 == 1:
+            winner, board = game(MLPAgent(mlp), MLPAgent(lr))
+        else:
+            winner, board = game(MLPAgent(lr), MLPAgent(mlp))
         if winner == P1:
             print("Game %s was won by player 1:" % i)
         elif winner == P2:
@@ -168,7 +173,28 @@ def main():
         else:
             print("Game %s was a tie." % i)
         print_board(board)
-    print("Final:")
+    # print("Final:")
+    # print(mlp.weights)
+
+def train(mlp):
+    last = None
+    count = 0
+    for i in range(100):
+        winner, board = game(MLPAgent(mlp), MLPAgent(mlp))
+        if last and board == last:
+            count += 1
+        else:
+            last = board
+            count = 0
+        if winner == P1:
+            print("Game %s was won by player 1:" % i)
+        elif winner == P2:
+            print("Game %s was won by player 2:" % i)
+        else:
+            print("Game %s was a tie." % i)
+        print_board(board)
+        if count > 10:
+            break
     print(mlp.weights)
 
 def test():
