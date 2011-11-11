@@ -67,7 +67,7 @@ def minimax(board, p, f=None, i=None, a=None, b=None):
         best_board = None
         for s in next_states(board, p):
             if f and i == 0:
-                u = 2 - f(board, p)
+                u = 2 - f(s, -p)
             else:
                 u = 2 - minimax(s, -p, f, i - 1 if i else None, b, a)[0]
             if not v or u > v:
