@@ -1,3 +1,5 @@
+from mlp import MLP
+
 # The size of a side of the game board.
 N = 3
 
@@ -85,57 +87,85 @@ def game(p1, p2):
         if p1_turn:
             board = p1.move(board)
         else:
-            board = p1.move(board)
+            board = p2.move(board)
         p1_turn = not p1_turn
     result = final_state(board, 1)
     p1.game_over(result)
     p2.game_over(2 - result)
     print_board(board)
+    return result
 
 class Agent(object):
     """An interface that defines what a game agent should be able to do."""
     
-    def set_player(p):
+    def set_player(self, p):
         """Sets the player of this agent to 1 or -1."""
-        self.p == p
+        self.p = p
     
     def move(self, board):
         """Performs an action on the board and returns the new board."""
         raise NotImplementedError
     
-    def game_over(score):
+    def game_over(self, score):
         """Function called when the game has ended."""
         pass
     
 
-# print(minimax([0 for _ in range(n*n)], 1))
-assert minimax([
-    1, -1, 1,
-    -1, 0, 0,
-    0, 0, 0
-], 1) == 2
-assert minimax([
-    -1, 1, -1,
-    1, -1, 1,
-    0, 0, 0
-], 1) == 0
-assert minimax([
-    -1, 1, -1,
-    1, 0, 1,
-    0, 0, 0
-], -1) == 2
-assert minimax([
-    1, -1, 1,
-    -1, 1, 0,
-    0, 0, 0
-], -1) == 0
-assert minimax([
-    0, 0, -1,
-    0, 1, 0,
-    0, 0, 0
-], 1) == 1
-assert minimax([
-    0, 0, 0,
-    0, 0, 0,
-    0, 0, 0
-], 1) == 1
+class MinimaxAgent(Agent):
+    """A perfect agent that plays using the full minimax algorithm."""
+    
+    def move(self, board):
+        return minimax(board, self.p)[1]
+    
+
+class MLPAgent(Agent):
+    """An imperfect agent that uses MLP learning to play."""
+    
+    def __init__(self, mlp):
+        self.mlp = mlp
+        self.examples = []
+    
+    def eval(self, board, p):
+        print(p)
+        return self.mlp.run([p] + board)[0] * 2
+    
+    def move(self, board):
+        return minimax(board, self.p, self.eval, 4)[1]
+    
+
+def test():
+    assert minimax([
+        1, -1, 1,
+        -1, 0, 0,
+        0, 0, 0
+    ], 1)[0] == 2
+    assert minimax([
+        -1, 1, -1,
+        1, -1, 1,
+        0, 0, 0
+    ], 1)[0] == 0
+    assert minimax([
+        -1, 1, -1,
+        1, 0, 1,
+        0, 0, 0
+    ], -1)[0] == 2
+    assert minimax([
+        1, -1, 1,
+        -1, 1, 0,
+        0, 0, 0
+    ], -1)[0] == 0
+    assert minimax([
+        0, 0, -1,
+        0, 1, 0,
+        0, 0, 0
+    ], 1)[0] == 1
+    assert minimax([
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0
+    ], 1)[0] == 1
+
+if __name__ == "__main__":
+    # test()
+    mlp = MLP.create(10, 10, 1)
+    print(game(MinimaxAgent(), MLPAgent(mlp)))
