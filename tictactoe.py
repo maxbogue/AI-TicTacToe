@@ -121,6 +121,7 @@ class MLPAgent(Agent):
     def game_over(self, score):
         truths = [[score] for _ in range(len(self.examples))]
         self.mlp.train(self.examples, truths)
+        self.examples = []
     
 
 class RandomAgent(Agent):
