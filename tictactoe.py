@@ -122,15 +122,20 @@ class MLPAgent(Agent):
     
     def __init__(self, mlp):
         self.mlp = mlp
-        self.examples = []
+        self.examples = {P1: [], P2: []}
     
     def eval(self, board, p):
-        print(p)
-        return self.mlp.run([p] + board)[0] * 2
+        assert(p == self.p)
+        x = [p] + board
+        self.examples[p].append(x)
+        return self.mlp.run(x)[0] * 2
     
     def move(self, board):
-        return minimax(board, self.p, self.eval, 4)[1]
+        return minimax(board, self.p, self.eval, 3)[1]
     
+    def game_over(self, score):
+        truths = [[score] for _ in range(len(self.examples[self.p]))]
+        self.mlp.train(self.examples[self.p], truths)
 
 def test():
     assert minimax([
