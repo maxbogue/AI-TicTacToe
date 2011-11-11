@@ -117,6 +117,4 @@ class MLP(object):
     
 
 if __name__ == "__main__":
-    m = MLP.create(2, 10, 2)
-    m.train([[1, 2] for _ in range(100)], [[0,1] for _ in range(100)])
-    print(m.run([1, 2]))
+    pass
