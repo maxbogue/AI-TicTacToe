@@ -13,7 +13,6 @@ def zipWith(f, *ls):
     return map(lambda t: f(*t), zip(*ls))
 
 def dot(xs, ys):
-    # print(xs, ys)
     assert len(xs) == len(ys)
     return sum(zipWith(mult, xs, ys))
 
@@ -23,8 +22,8 @@ def col(m, i):
 def pprint(array):
     print("[%s]" % "\n".join(map(str, array)))
 
-class MLP(object):
-    """Represents a multi-layer perceptron.
+class NeuralNet(object):
+    """Represents a neural network.
     
     The weights are oriented as follows:
     The first dimension is the layer (w[i] is between layers i and i+1).
@@ -34,10 +33,10 @@ class MLP(object):
     """
     @staticmethod
     def create(*layout, **extras):
-        """Creates an MLP with random weights.
+        """Creates a neural net with random weights.
         
         layout is a list of numbers of nodes for each layer; e.g.
-        MLP.create(10, 10, 1) produces 10 input nodes, 10 hidden nodes,
+        NeuralNet.create(10, 10, 1) produces 10 input nodes, 10 hidden nodes,
         and 1 output node.
         
         """
@@ -48,10 +47,10 @@ class MLP(object):
                 for k in range(layout[i] + 1)]
                     for j in range(layout[i+1])]
                         for i in range(len(layout) - 1)]
-        return MLP(weights, **extras)
+        return NeuralNet(weights, **extras)
     
     def __init__(self, weights, lr=0.1, act=sigmoid):
-        """Initializes an MLP.
+        """Initializes a NeuralNet.
         
         weights is a list of weight arrays for each layer.
         lr is the learning rate.
@@ -62,7 +61,7 @@ class MLP(object):
         self.act = act
     
     def run(self, x, learning=False):
-        """Runs the MLP on input list x.
+        """Runs the NeuralNet on input list x.
         
         Returns the output if learning=False and a tuple of raw and
         activated values matrices if it's True.

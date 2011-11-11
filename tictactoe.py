@@ -1,6 +1,6 @@
 import random
 
-from mlp import MLP
+from nn import NeuralNet
 
 # The size of a side of the game board.
 N = 3
@@ -102,25 +102,25 @@ class MinimaxAgent(Agent):
         return minimax(board, self.p)[1]
     
 
-class MLPAgent(Agent):
-    """An imperfect agent that uses MLP learning to play."""
+class NeuralNetAgent(Agent):
+    """An imperfect agent that uses a neural network to learn and play."""
     
-    def __init__(self, mlp):
-        self.mlp = mlp
+    def __init__(self, nn):
+        self.nn = nn
         self.examples = []
     
     def eval(self, board, p):
         assert(p == self.p)
         x = [p] + board
         self.examples.append(x)
-        return self.mlp.run(x)[0] * 2
+        return self.nn.run(x)[0] * 2
     
     def move(self, board):
         return minimax(board, self.p, self.eval, 3)[1]
     
     def game_over(self, score):
         truths = [[score] for _ in range(len(self.examples))]
-        self.mlp.train(self.examples, truths)
+        self.nn.train(self.examples, truths)
         self.examples = []
     
 
@@ -157,15 +157,15 @@ def game(p1, p2):
     return result - 1, board
 
 def main():
-    mlp = MLP.create(10, 10, 1)
-    lr = MLP.create(10, 1)
+    mlp = NeuralNet.create(10, 10, 1)
+    lr = NeuralNet.create(10, 1)
     train(mlp)
     train(lr)
     for i in range(1, 10):
         if i % 2 == 1:
-            winner, board = game(MLPAgent(mlp), MLPAgent(lr))
+            winner, board = game(NeuralNetAgent(mlp), NeuralNetAgent(lr))
         else:
-            winner, board = game(MLPAgent(lr), MLPAgent(mlp))
+            winner, board = game(NeuralNetAgent(lr), NeuralNetAgent(mlp))
         if winner == P1:
             print("Game %s was won by player 1:" % i)
         elif winner == P2:
@@ -180,7 +180,7 @@ def train(mlp):
     last = None
     count = 0
     for i in range(100):
-        winner, board = game(MLPAgent(mlp), MLPAgent(mlp))
+        winner, board = game(NeuralNetAgent(mlp), NeuralNetAgent(mlp))
         if last and board == last:
             count += 1
         else:
