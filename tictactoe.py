@@ -77,23 +77,6 @@ def minimax(board, p, f=None, i=None, a=None, b=None):
                 return v, s
         return v, best_board
 
-def game(p1, p2):
-    p1.set_player(P1)
-    p2.set_player(P2)
-    board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    p1_turn = True
-    while final_state(board, 1) == None:
-        if p1_turn:
-            board = p1.move(board)
-        else:
-            board = p2.move(board)
-        p1_turn = not p1_turn
-    result = final_state(board, P1)
-    p1.game_over(result)
-    p2.game_over(2 - result)
-    print(result)
-    return result - 1, board
-
 class Agent(object):
     """An interface that defines what a game agent should be able to do."""
     
@@ -137,6 +120,37 @@ class MLPAgent(Agent):
         truths = [[score] for _ in range(len(self.examples[self.p]))]
         self.mlp.train(self.examples[self.p], truths)
 
+def game(p1, p2):
+    p1.set_player(P1)
+    p2.set_player(P2)
+    board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    p1_turn = True
+    while final_state(board, 1) == None:
+        if p1_turn:
+            board = p1.move(board)
+        else:
+            board = p2.move(board)
+        p1_turn = not p1_turn
+    result = final_state(board, P1)
+    p1.game_over(result)
+    p2.game_over(2 - result)
+    return result - 1, board
+
+def main():
+    mlp = MLP.create(10, 10, 1)
+    lr = MLP.create(10, 1)
+    for i in range(1, 101):
+        winner, board = game(MLPAgent(mlp), SemiRandomAgent())
+        if winner == P1:
+            print("Game %s was won by player 1:" % i)
+        elif winner == P2:
+            print("Game %s was won by player 2:" % i)
+        else:
+            print("Game %s was a tie." % i)
+        print_board(board)
+    print("Final:")
+    print(mlp.weights)
+
 def test():
     assert minimax([
         1, -1, 1,
@@ -171,17 +185,4 @@ def test():
 
 if __name__ == "__main__":
     # test()
-    mlp = MLP.create(10, 10, 1)
-    # lr = MLP.create(10, 1)
-    for i in range(10):
-        winner, board = game(MLPAgent(mlp), MLPAgent(mlp))
-        print(winner)
-        if winner == P1:
-            print("Game %s was won by player 1:" % i)
-        elif winner == P2:
-            print("Game %s was won by player 2:" % i)
-        else:
-            print("Game %s was a tie." % i)
-        print_board(board)
-    print("Final:")
-    print(mlp.weights)
+    main()
