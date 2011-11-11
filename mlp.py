@@ -17,6 +17,9 @@ def dot(xs, ys):
     assert len(xs) == len(ys)
     return sum(zipWith(mult, xs, ys))
 
+def col(m, i):
+    return list(map(lambda r: r[i], m))
+
 def pprint(array):
     print("[%s]" % "\n".join(map(str, array)))
 
@@ -38,12 +41,11 @@ class MLP(object):
         and 1 output node.
         
         """
-        # Add a bias for each layer except the last.
-        layout = list(map(lambda n: n + 1, layout[:-1])) + [layout[-1]];
         # Generate weights using awesome list comprehensions.
         weights = [[[
             random() * 2 - 1
-                for k in range(layout[i])]
+                # Add a bias for each layer.
+                for k in range(layout[i] + 1)]
                     for j in range(layout[i+1])]
                         for i in range(len(layout) - 1)]
         return MLP(weights, **extras)
@@ -69,9 +71,7 @@ class MLP(object):
         v = [x] # raw values
         a = [x] # activated values
         for i, w in enumerate(self.weights):
-            if i < len(self.weights) - 1:
-                a[i].insert(0, 1)
-            raw = list(map(lambda r: dot(r, a[i]), w))
+            raw = list(map(lambda r: dot(r, [1] + a[i]), w))
             activated = list(map(self.act, raw))
             v.append(raw)
             a.append(activated)
@@ -89,21 +89,25 @@ class MLP(object):
         
         """
         w = self.weights
+        assert len(t) == len(w[-1])
+        assert len(t) == len(a[-1])
+        assert len(t) == len(v[-1])
+        
         da = derivatives[self.act] # da for derivative of activation
         d = [[] for _ in range(len(w))] # d for deltas
         
-        calc_bottom_delta = lambda i: (t[i] - a[-1][i]) * da(v[-1][i])
-        d[-1] = list(map(calc_bottom_delta, range(len(t))))
+        for i in range(len(w[-1])):
+            d[-1].append((t[i] - a[-1][i]) * da(v[-1][i]))
         
-        for l in reversed(range(len(w))[:-1]):
-            delta = lambda i: dot([1] + d[l + 1], w[l][i]) * da(v[l+1][i])
-            d[l] = list(map(delta, range(len(w[l]))))
+        for l in reversed(range(len(w) - 1)):
+            for i in range(len(w[l])):
+                d[l].append(dot(d[l+1], col(w[l+1], i+1)) * da(v[l][i]))
         
         for l in range(len(w)):
+            a[l] = [1] + a[l]
             for j in range(len(w[l])):
                 for i in range(len(w[l][j])):
                     w[l][j][i] = w[l][j][i] + self.lr * a[l][i] * d[l][j]
-        # pprint(d)
     
     def train(self, xs, ts):
         """Train on a set of samples xs and truth vectors ts."""
