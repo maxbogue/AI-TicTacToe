@@ -42,8 +42,6 @@ def final_state(board, p):
     2 for win
     
     """
-    if not any(map(lambda x: x == ES, board)):
-        return 1 # Tie
     lines = [[], []]
     for i in range(N):
         lines[0].append(i * (N + 1))
@@ -55,6 +53,8 @@ def final_state(board, p):
             return 2
         if all(map(lambda i: board[i] == -p, line)):
             return 0
+    if not any(map(lambda x: x == ES, board)):
+        return 1 # Tie
     return None
 
 def minimax(board, p, f=None, i=None, a=None, b=None):
