@@ -56,18 +56,25 @@ def final_state(board, p):
             return 0
     return None
 
-def minimax(board, p, a=None, b=None):
+def minimax(board, p, f=None, i=None, a=None, b=None):
     result = final_state(board, p)
     if result != None:
-        return result
+        return result, board
     else:
-        v = 0
+        v = None
+        best_board = None
         for s in next_states(board, p):
-            v = max(v, 2 - minimax(s, -p, b, a))
+            if f and i == 0:
+                u = 2 - f(board, p)
+            else:
+                u = 2 - minimax(s, -p, f, i - 1 if i else None, b, a)[0]
+            if not v or u > v:
+                v = u
+                best_board = s
+                a = max(a, v) if a else v
             if b and v >= b:
-                return v
-            a = max(a, v) if a else v
-        return v
+                return v, s
+        return v, best_board
 
 def game(p1, p2):
     p1.set_player(P1)
