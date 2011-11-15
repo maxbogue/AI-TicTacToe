@@ -1,4 +1,6 @@
+import json
 import random
+import sys
 
 from nn import NeuralNet
 
@@ -82,6 +84,10 @@ def minimax(board, p, f=None, i=None, a=None, b=None):
 class Agent(object):
     """An interface that defines what a game agent should be able to do."""
     
+    def __init__(self, name):
+        self.name = name
+        self.score = 0
+    
     def set_player(self, p):
         """Sets the player of this agent to 1 or -1."""
         self.p = p
@@ -92,7 +98,10 @@ class Agent(object):
     
     def game_over(self, score):
         """Function called when the game has ended."""
-        pass
+        self.score += score
+    
+    def __str__(self):
+        return "%s as P%s" % (self.name, 1 if self.p == 1 else 2)
     
 
 class MinimaxAgent(Agent):
@@ -105,7 +114,8 @@ class MinimaxAgent(Agent):
 class NeuralNetAgent(Agent):
     """An imperfect agent that uses a neural network to learn and play."""
     
-    def __init__(self, nn):
+    def __init__(self, name, nn):
+        Agent.__init__(self, name)
         self.nn = nn
         self.examples = []
     
@@ -119,8 +129,9 @@ class NeuralNetAgent(Agent):
         return minimax(board, self.p, self.eval, 3)[1]
     
     def game_over(self, score):
+        Agent.game_over(self, score)
         truths = [[score] for _ in range(len(self.examples))]
-        self.nn.train(self.examples, truths)
+        self.nn.train(self.examples, truths))
         self.examples = []
     
 
@@ -140,7 +151,7 @@ class SemiRandomAgent(Agent):
         return minimax(board, self.p, self.eval, 3)[1]
     
 
-def game(p1, p2):
+def play_game(p1, p2):
     p1.set_player(P1)
     p2.set_player(P2)
     board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -150,52 +161,78 @@ def game(p1, p2):
             board = p1.move(board)
         else:
             board = p2.move(board)
+        print()
+        print_board(board)
         p1_turn = not p1_turn
     result = final_state(board, P1)
     p1.game_over(result)
     p2.game_over(2 - result)
-    return result - 1, board
+    if result == 1:
+        print("Tie game. (%s)\n" % p1)
+        return None, board
+    else:
+        winner = p1 if result == 2 else p2
+        loser = p1 if result == 0 else p2
+        print("%s has defeated %s.\n" % (winner, loser))
+        return winner, board
 
-def main():
-    mlp = NeuralNet.create(10, 10, 1)
-    lr = NeuralNet.create(10, 1)
-    train(mlp)
-    train(lr)
-    for i in range(1, 10):
-        if i % 2 == 1:
-            winner, board = game(NeuralNetAgent(mlp), NeuralNetAgent(lr))
+def tournament(p1, p2):
+    if random.random() < 0.5:
+        p1, p2 = p2, p1
+    results = []
+    for i in range(1, 6):
+        print("Game %s:" % i)
+        winner, board = play_game(p1, p2)
+        results.append((i, p1, winner, board))
+        if winner != p1:
+            p1, p2 = p2, p1
+    print("Tournament summary: %s versus %s\n" % (p1.name, p2.name))
+    for i, pp1, winner, board in results:
+        if winner:
+            print("Game %s was won by %s as P%s:" %
+                (i, winner.name, 1 if winner == pp1 else 2))
         else:
-            winner, board = game(NeuralNetAgent(lr), NeuralNetAgent(mlp))
-        if winner == P1:
-            print("Game %s was won by player 1:" % i)
-        elif winner == P2:
-            print("Game %s was won by player 2:" % i)
-        else:
-            print("Game %s was a tie." % i)
+            print("Game %s was a tie. (%s as P1)" % (i, pp1.name))
         print_board(board)
-    # print("Final:")
-    # print(mlp.weights)
+        print()
+    print("Final scores:")
+    print("%s: %s" %(p1.name, p1.score))
+    print("%s: %s" %(p2.name, p2.score))
 
-def train(mlp):
+def main(weight_file=None):
+    if weight_file:
+        with open(weight_file, "r") as f:
+            weights = json.load(f)
+        mlp = NeuralNet(weights["mlp"])
+        lr = NeuralNet(weights["lr"])
+    else:
+        mlp = NeuralNet.create(10, 10, 1)
+        lr = NeuralNet.create(10, 1)
+        train(mlp)
+        train(lr)
+        with open("weights.json", "w") as f:
+            json.dump({
+                "mlp": mlp.weights,
+                "lr": lr.weights,
+            }, f)
+    tournament(NeuralNetAgent("MLP", mlp), NeuralNetAgent("LR", lr))
+
+def train(nn):
     last = None
     count = 0
-    for i in range(100):
-        winner, board = game(NeuralNetAgent(mlp), NeuralNetAgent(mlp))
+    a1 = NeuralNetAgent("Agent 1", nn)
+    a2 = NeuralNetAgent("Agent 2", nn)
+    for i in range(1, 101):
+        print("Training game %s:" % i)
+        winner, board = play_game(a1, a2)
         if last and board == last:
             count += 1
         else:
             last = board
             count = 0
-        if winner == P1:
-            print("Game %s was won by player 1:" % i)
-        elif winner == P2:
-            print("Game %s was won by player 2:" % i)
-        else:
-            print("Game %s was a tie." % i)
-        print_board(board)
-        if count > 10:
-            break
-    print(mlp.weights)
+        # if count > 10:
+            # break
+    print(nn.weights)
 
 def test():
     assert minimax([
@@ -230,5 +267,7 @@ def test():
     ], 1)[0] == 1
 
 if __name__ == "__main__":
-    # test()
-    main()
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main()
