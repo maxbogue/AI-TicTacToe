@@ -49,7 +49,7 @@ class NeuralNet(object):
                         for i in range(len(layout) - 1)]
         return NeuralNet(weights, **extras)
     
-    def __init__(self, weights, lr=0.1, act=sigmoid):
+    def __init__(self, weights, lr=0.01, act=sigmoid):
         """Initializes a NeuralNet.
         
         weights is a list of weight arrays for each layer.
