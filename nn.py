@@ -31,6 +31,7 @@ class NeuralNet(object):
     The third dimension is the source node (from layer i).
     
     """
+    
     @staticmethod
     def create(*layout, **extras):
         """Creates a neural net with random weights.
@@ -107,12 +108,17 @@ class NeuralNet(object):
             for j in range(len(w[l])):
                 for i in range(len(w[l][j])):
                     w[l][j][i] = w[l][j][i] + self.lr * a[l][i] * d[l][j]
+        
+        all_deltas = [x for di in d for x in di]
+        return sum(all_deltas) / len(all_deltas)
     
     def train(self, xs, ts):
         """Train on a set of samples xs and truth vectors ts."""
+        ds = []
         for x, t in zip(xs, ts):
             v, a = self.run(x, True)
-            self.learn(t, v, a)
+            ds.append(self.learn(t, v, a))
+        return sum(ds) / len(ds) # this value not currently used
     
 
 if __name__ == "__main__":
