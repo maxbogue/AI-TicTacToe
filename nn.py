@@ -98,9 +98,9 @@ class NeuralNet(object):
         for i in range(len(w[-1])):
             d[-1].append((t[i] - a[-1][i]) * da(v[-1][i]))
         
-        for l in reversed(range(len(w) - 1)):
-            for i in range(len(w[l])):
-                d[l].append(dot(d[l+1], col(w[l+1], i+1)) * da(v[l][i]))
+        for l in reversed(range(1, len(w))):
+            for i in range(1, len(w[l][0])): # skip bias
+                d[l-1].append(dot(d[l], col(w[l], i)) * da(v[l][i-1]))
         
         for l in range(len(w)):
             a[l] = [1] + a[l]
